@@ -19,13 +19,21 @@ RCT_EXPORT_METHOD(start)
   RCTLogInfo(@"started!");
   ASScreenRecorder *recorder = [ASScreenRecorder sharedInstance];
   
+  if (!recorder.isRecording) {
+    [recorder startRecording];
+    RCTLogInfo(@"Start recording");
+  }
+}
+
+RCT_EXPORT_METHOD(stop)
+{
+  RCTLogInfo(@"started!");
+  ASScreenRecorder *recorder = [ASScreenRecorder sharedInstance];
+  
   if (recorder.isRecording) {
     [recorder stopRecordingWithCompletion:^{
       RCTLogInfo(@"Finished recording");
     }];
-  } else {
-    [recorder startRecording];
-    RCTLogInfo(@"Start recording");
   }
 }
 @end
