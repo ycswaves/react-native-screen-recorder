@@ -6,10 +6,12 @@ import {
   View,
   CameraRoll,
   Button,
-  NativeModules 
+  NativeModules,
+  Platform
 } from 'react-native';
 import Video from 'react-native-video';
 import VideoPlayer from 'react-native-video-controls';
+import RNFS from 'react-native-fs';
 const { RecorderManager } = NativeModules;
 
 export default class App extends React.Component {
@@ -53,6 +55,21 @@ export default class App extends React.Component {
           disableStopped: true,
           disablePlayable: true,
         })
+      } else if (Platform.OS === 'android') {
+        const path = RNFS.ExternalStorageDirectoryPath + '/Download/video.mp4';
+        RNFS.exists(path).then(exists => {
+          console.log(exists, path);
+          
+          if (exists) {
+            this.setState({
+              videoUri: path,
+              disableStart: true,
+              disableStopped: true,
+              disablePlayable: true,
+            })
+          }
+        })
+
       }
     })
   }
