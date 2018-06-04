@@ -9,7 +9,6 @@ import {
   NativeModules,
   Platform
 } from 'react-native';
-import Video from 'react-native-video';
 import VideoPlayer from 'react-native-video-controls';
 import RNFS from 'react-native-fs';
 const { RecorderManager } = NativeModules;
@@ -41,25 +40,10 @@ export default class App extends React.Component {
   }
 
   play = () => {
-    CameraRoll.getPhotos({
-      first: 1,
-      assetType: 'Videos'
-    })
-    .then(r => {
-      console.log(r.edges);
-      if (r.edges.length > 0) {
-        const video = r.edges[0].node.image;
-        this.setState({
-          videoUri: video.uri,
-          disableStart: true,
-          disableStopped: true,
-          disablePlayable: true,
-        })
-      } else if (Platform.OS === 'android') {
+    switch (Platform.OS) {
+      case 'android':
         const path = RNFS.ExternalStorageDirectoryPath + '/Download/video.mp4';
-        RNFS.exists(path).then(exists => {
-          console.log(exists, path);
-          
+        RNFS.exists(path).then(exists => {          
           if (exists) {
             this.setState({
               videoUri: path,
@@ -68,13 +52,32 @@ export default class App extends React.Component {
               disablePlayable: true,
             })
           }
-        })
+        });
+        break;
 
-      }
-    })
+      case 'ios':
+        CameraRoll.getPhotos({
+          first: 1,
+          assetType: 'Videos'
+        }).then(r => {
+          if (r.edges.length > 0) {
+            const video = r.edges[0].node.image;
+            this.setState({
+              videoUri: video.uri,
+              disableStart: true,
+              disableStopped: true,
+              disablePlayable: true,
+            })
+          }
+        });
+      break;  
+    
+      default:
+        break;
+    }
   }
 
-  playEnded = () => {
+  playEnded = () => {      
     this.setState({
       videoUri: null,
       disableStart: false,
@@ -91,7 +94,6 @@ export default class App extends React.Component {
           {videoUri && 
             <VideoPlayer
               source={{ uri: videoUri }}
-              navigator={ this.props.navigator }
               onEnd={this.playEnded}
             />
           }
@@ -100,15 +102,16 @@ export default class App extends React.Component {
               style={styles.textInput}
               autoFocus
               multiline
+              underlineColorAndroid="white"
               onChangeText={(text) => this.setState({text})}
               value={this.state.text}
             />
           }
         </View>
         <View style={styles.footer}>
-          <Button disabled={disableStart} title="Start" onPress={this.start} />
-          <Button disabled={disableStopped} title="Stop" onPress={this.stop} />
-          <Button disabled={disablePlayable} title="Play" onPress={this.play} />
+          <Button style={styles.button} disabled={disableStart} title="Start" onPress={this.start} />
+          <Button style={styles.button} disabled={disableStopped} title="Stop" onPress={this.stop} />
+          <Button style={styles.button} disabled={disablePlayable} title="Play" onPress={this.play} />
         </View>
       </View>
     );
@@ -126,21 +129,23 @@ const styles = StyleSheet.create({
 
   content: {
     flex: 1,
+    flexDirection: 'row',
+    padding: 20,
     justifyContent: 'center',
   },
 
   textInput: {
-    width: 200,
     borderColor: 'gray',
     borderWidth: 1,
-    alignSelf: 'stretch',
+    flex: 1,
+    fontSize: 24
   },
 
   footer: {
-    backgroundColor: '#eee',
+    backgroundColor: Platform.OS==='ios' ? '#eee' : '#fff',
     flexDirection: 'row',
     alignSelf: 'stretch',
-    height: 40,
-    justifyContent: 'space-around'
-  }
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
 });

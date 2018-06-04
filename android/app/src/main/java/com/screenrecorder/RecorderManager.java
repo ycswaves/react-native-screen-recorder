@@ -34,13 +34,13 @@ public class RecorderManager extends ReactContextBaseJavaModule {
   @ReactMethod
   public void start() {
     mWeakActivity.get().startRecording();
-    Toast.makeText(getReactApplicationContext(), "started", Toast.LENGTH_LONG).show();
+    Toast.makeText(getReactApplicationContext(), "started", Toast.LENGTH_SHORT).show();
   }
 
   @ReactMethod
   public void stop() {
     mWeakActivity.get().stopRecording();
-    Toast.makeText(getReactApplicationContext(), "stopped", Toast.LENGTH_LONG).show();
+    Toast.makeText(getReactApplicationContext(), "stopped", Toast.LENGTH_SHORT).show();
 
   }
 }
