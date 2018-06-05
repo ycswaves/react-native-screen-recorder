@@ -21,7 +21,11 @@ To implement screen recording on Android, multiple classes from multiple android
 
 The output video is stored in external storage of Android for the time being (that means it may not work on devices without external storage). Unlike the implementation on iOS which generate a new copy of video file for each recording session, the same video file will be overwritten again and again on Android with current implementation.
 
-Since there's only one copy of the video all the time, the file path to the video is deterministic, therefore, a package called `react-native-fs` is used to obtain the full path of the video from the device and supply to the `VideoPlayer` component to play.
+
+#### Video playing
+Initially since there's only one copy of the video all the time, the file path to the video is deterministic, therefore, a package called `react-native-fs` is used to obtain the full path of the video from the device and supply to the `VideoPlayer` component to play.
+
+After exploring ["Sending Events to JavaScript"](https://facebook.github.io/react-native/docs/native-modules-ios.html#sending-events-to-javascript), the file path of the video is sent back to react side by emitting respective event. Therefore, `react-native-fs` is no longer needed and the react side also does not need to memorize the file path anymore.
 
 
 ### References
