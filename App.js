@@ -7,10 +7,11 @@ import {
   CameraRoll,
   Button,
   NativeModules,
-  Platform
+  Platform,
+  DeviceEventEmitter,
+  Keyboard
 } from 'react-native';
 import VideoPlayer from 'react-native-video-controls';
-import RNFS from 'react-native-fs';
 const { RecorderManager } = NativeModules;
 
 export default class App extends React.Component {
@@ -19,6 +20,8 @@ export default class App extends React.Component {
     disableStart: false,
     disableStopped: true,
     disablePlayable: true,
+    androidVideoUrl: null,
+    keyboardIsShown: false,
   }
 
   start = () => {
@@ -42,17 +45,15 @@ export default class App extends React.Component {
   play = () => {
     switch (Platform.OS) {
       case 'android':
-        const path = RNFS.ExternalStorageDirectoryPath + '/Download/video.mp4';
-        RNFS.exists(path).then(exists => {          
-          if (exists) {
-            this.setState({
-              videoUri: path,
-              disableStart: true,
-              disableStopped: true,
-              disablePlayable: true,
-            })
-          }
-        });
+        const { androidVideoUrl } = this.state;   
+        if (androidVideoUrl) {
+          this.setState({
+            videoUri: androidVideoUrl,
+            disableStart: true,
+            disableStopped: true,
+            disablePlayable: true,
+          })
+        }
         break;
 
       case 'ios':
@@ -83,13 +84,54 @@ export default class App extends React.Component {
       disableStart: false,
       disableStopped: true,
       disablePlayable: true,
+      androidVideoUrl: null,
     });
+  }
+
+  keyboardDidShow = () => {
+    this.setState({keyboardIsShown: true});
+  }
+  
+  keyboardDidHide = () => {
+    this.setState({keyboardIsShown: false});
+  }
+
+  rendernControlBtnGroup = () => {
+    const { disableStart, disableStopped, disablePlayable } = this.state;
+    return (
+      <View style={styles.footer}>
+        <Button style={styles.button} disabled={disableStart} title="Start" onPress={this.start} />
+        <Button style={styles.button} disabled={disableStopped} title="Stop" onPress={this.stop} />
+        <Button style={styles.button} disabled={disablePlayable} title="Play" onPress={this.play} />
+      </View>
+    )
+  }
+
+  componentWillMount() {
+    DeviceEventEmitter.addListener('updateFilePath', (filePath) => {
+      console.log(filePath);
+      
+      this.setState({androidVideoUrl: filePath});  
+    });
+  }
+
+  componentDidMount () {
+    this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.keyboardDidShow);
+    this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this.keyboardDidHide);
+  }
+
+  componentWillUnmount () {
+    this.keyboardDidShowListener.remove();
+    this.keyboardDidHideListener.remove();
   }
   
   render() {
-    const { disableStart, disableStopped, disablePlayable, videoUri } = this.state;
+    const { videoUri, keyboardIsShown } = this.state;
     return (
       <View style={styles.container}>
+        {Platform.OS === 'ios' && keyboardIsShown &&
+          this.rendernControlBtnGroup()
+        }
         <View style={styles.content}>
           {videoUri && 
             <VideoPlayer
@@ -100,7 +142,6 @@ export default class App extends React.Component {
           {!videoUri && 
             <TextInput
               style={styles.textInput}
-              autoFocus
               multiline
               underlineColorAndroid="white"
               onChangeText={(text) => this.setState({text})}
@@ -108,11 +149,7 @@ export default class App extends React.Component {
             />
           }
         </View>
-        <View style={styles.footer}>
-          <Button style={styles.button} disabled={disableStart} title="Start" onPress={this.start} />
-          <Button style={styles.button} disabled={disableStopped} title="Stop" onPress={this.stop} />
-          <Button style={styles.button} disabled={disablePlayable} title="Play" onPress={this.play} />
-        </View>
+        {this.rendernControlBtnGroup()}
       </View>
     );
   }

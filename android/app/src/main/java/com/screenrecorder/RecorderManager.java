@@ -7,6 +7,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.screenrecorder.MainActivity;
 
 import java.lang.ref.WeakReference;
@@ -26,6 +27,7 @@ public class RecorderManager extends ReactContextBaseJavaModule {
     mWeakActivity = new WeakReference<MainActivity>(activity);
   }
 
+
   @Override
   public String getName() {
     return "RecorderManager";
@@ -40,6 +42,11 @@ public class RecorderManager extends ReactContextBaseJavaModule {
   @ReactMethod
   public void stop() {
     mWeakActivity.get().stopRecording();
+    String filePath = mWeakActivity.get().getVideoPath();
+    getReactApplicationContext()
+            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+            .emit("updateFilePath", filePath);
+
     Toast.makeText(getReactApplicationContext(), "stopped", Toast.LENGTH_SHORT).show();
 
   }
