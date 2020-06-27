@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class RecorderReactPackage implements ReactPackage {
+public class
+
+RecorderReactPackage implements ReactPackage {
 
   @Override
   public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
@@ -21,7 +23,8 @@ public class RecorderReactPackage implements ReactPackage {
 
   @Override
   public List<NativeModule> createNativeModules(
-                              ReactApplicationContext reactContext) {
+    ReactApplicationContext reactContext
+  ) {
     List<NativeModule> modules = new ArrayList<>();
 
     modules.add(new RecorderManager(reactContext));

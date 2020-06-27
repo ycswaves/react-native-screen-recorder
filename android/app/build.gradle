@@ -150,6 +150,7 @@ dependencies {
     implementation "com.facebook.react:react-native:+"  // From node_modules
     implementation project(':react-native-fs')
     implementation project(':react-native-video')
+    implementation 'com.android.support:design:28.0.0'
 
     if (enableHermes) {
         def hermesPath = "../../node_modules/hermes-engine/android/";
